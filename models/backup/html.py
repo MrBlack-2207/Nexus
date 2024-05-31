@@ -1,5 +1,6 @@
 import requests
 from dotenv import load_dotenv
+import json
 import csv
 import os
 
@@ -46,17 +47,23 @@ for category in video_data:
         video_data[category].append({'title': '', 'videoId': ''})
 
 
-with open('youtube_videos.csv', 'w', newline='',encoding='utf-8') as csvfile:
-    fieldnames = ['short', 'medium', 'long']
-    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+# Generate HTML table
+html_table = "<table border='1'>\n"
+html_table += "<tr><th>Short Videos</th><th>Medium Videos</th><th>Long Videos</th></tr>\n"
 
-    writer.writeheader()
+for i in range(max_length):
+    html_table += "<tr>"
+    for category in ['short', 'medium', 'long']:
+        video = video_data[category][i]
+        if video['videoId']:
+            video_link = f"https://www.youtube.com/watch?v={video['videoId']}"
+            html_table += f"<td><a href='{video_link}' target='_blank'>{video['title']}</a></td>"
+    html_table += "</tr>\n"
 
-    for i in range(max_length):
-        writer.writerow({
-            'short': f"{video_data['short'][i]['title']} (ID: {video_data['short'][i]['videoId']})",
-            'medium': f"{video_data['medium'][i]['title']} (ID: {video_data['medium'][i]['videoId']})",
-            'long': f"{video_data['long'][i]['title']} (ID: {video_data['long'][i]['videoId']})"
-        })
+html_table += "</table>"
 
-print("CSV file 'youtube_videos.csv' created successfully.")
+# Write HTML table to a file
+with open('youtube_videos.html', 'w', encoding='utf-8') as html_file:
+    html_file.write(html_table)
+
+print("HTML file 'youtube_videos.html' created successfully.")
